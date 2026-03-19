@@ -43,12 +43,15 @@ app.post('/api/login', async (req, res) => {
     }
 
     const [rows] = await pool.query(
-      'SELECT id, username, age, gender FROM users WHERE username = ? AND password = ?',
+      `SELECT u.id, u.username, u.age, u.gender, r.name as role 
+       FROM users u 
+       LEFT JOIN roles r ON u.role_id = r.id 
+       WHERE u.username = ? AND u.password = ? AND u.deleted_at IS NULL`,
       [username, password]
     );
 
     if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials or account deleted' });
     }
 
     res.json({ message: 'Login successful', user: rows[0] });
@@ -60,20 +63,22 @@ app.post('/api/login', async (req, res) => {
 
 // --- CRUD Endpoints for 'users' ---
 
-// CREATE: Add a new user
+// CREATE: Add a new user (Assign default 'user' role if none provided)
 app.post('/api/usuarios', async (req, res) => {
   try {
-    const { username, age, gender, password } = req.body;
+    const { username, age, gender, password, role_id } = req.body;
     
     if (!username || !age || !gender || !password) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Default to 'user' role (ID 5 based on database check) if not provided
+    const finalRoleId = role_id || 5; 
     const registeredAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     const [result] = await pool.execute(
-      'INSERT INTO users (username, age, gender, password, registered_at) VALUES (?, ?, ?, ?, ?)',
-      [username, age, gender, password, registeredAt]
+      'INSERT INTO users (username, age, gender, password, registered_date, role_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [username, age, gender, password, registeredAt, finalRoleId]
     );
 
     res.status(201).json({ id: result.insertId, message: 'User created successfully' });
@@ -83,10 +88,15 @@ app.post('/api/usuarios', async (req, res) => {
   }
 });
 
-// READ: Get all users
+// READ: Get all users (Exclude deleted ones)
 app.get('/api/usuarios', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM users');
+    const [rows] = await pool.query(
+      `SELECT u.id, u.username, u.age, u.gender, u.registered_date, r.name as role 
+       FROM users u 
+       LEFT JOIN roles r ON u.role_id = r.id 
+       WHERE u.deleted_at IS NULL`
+    );
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -94,17 +104,21 @@ app.get('/api/usuarios', async (req, res) => {
   }
 });
 
-// DELETE: Delete a user by ID
+// DELETE: Logical delete a user by ID
 app.delete('/api/usuarios/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [id]);
+    const deletedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const [result] = await pool.execute(
+      'UPDATE users SET deleted_at = ? WHERE id = ?', 
+      [deletedAt, id]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: 'User logically deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error deleting user' });
