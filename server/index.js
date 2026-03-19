@@ -43,9 +43,11 @@ app.post('/api/usuarios', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields: nombreCompleto, edad, sexo, password' });
     }
 
+    const registeredDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
     const [result] = await pool.execute(
-      'INSERT INTO usuarios (nombre_completo, edad, sexo, password) VALUES (?, ?, ?, ?)',
-      [nombreCompleto, edad, sexo, password]
+      'INSERT INTO usuarios (nombre_completo, edad, sexo, password, registered_date) VALUES (?, ?, ?, ?, ?)',
+      [nombreCompleto, edad, sexo, password, registeredDate]
     );
 
     res.status(201).json({ id: result.insertId, message: 'Usuario creado exitosamente' });
