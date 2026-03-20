@@ -9,6 +9,7 @@ import { Server } from 'socket.io';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import friendshipRoutes from './routes/friendshipRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,9 +42,25 @@ app.use((req, res, next) => {
 app.use('/api', authRoutes);
 app.use('/api/usuarios', userRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/friendships', friendshipRoutes);
+
+const onlineUsers = new Map();
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  socket.on('register', (userId) => {
+    onlineUsers.set(userId, socket.id);
+    io.emit('userStatusChange', Array.from(onlineUsers.keys()));
+  });
+
+  socket.on('disconnect', () => {
+    for (let [userId, socketId] of onlineUsers.entries()) {
+      if (socketId === socket.id) {
+        onlineUsers.delete(userId);
+        break;
+      }
+    }
+    io.emit('userStatusChange', Array.from(onlineUsers.keys()));
+  });
 });
 
 httpServer.listen(port, () => {
