@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import friendshipRoutes from './routes/friendshipRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +44,7 @@ app.use('/api', authRoutes);
 app.use('/api/usuarios', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/friendships', friendshipRoutes);
+app.use('/api/messages', messageRoutes);
 
 const onlineUsers = new Map();
 

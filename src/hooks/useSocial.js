@@ -8,6 +8,7 @@ export function useSocial(currentUser) {
   const [friendRequests, setFriendRequests] = useState([]);
   const [friendsList, setFriendsList] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchFeed = useCallback(async () => {
@@ -41,12 +42,22 @@ export function useSocial(currentUser) {
     });
     socket.on('userStatusChange', setOnlineUsers);
 
+    socket.on('privateMessage', (msg) => {
+      if (msg.receiver_id === currentUser.id) {
+        setNotifications(prev => {
+          if (!prev.includes(msg.sender_id)) return [...prev, msg.sender_id];
+          return prev;
+        });
+      }
+    });
+
     return () => {
       socket.off('newPost');
       socket.off('updateLikes');
       socket.off('newComment');
       socket.off('friendRequestUpdate');
       socket.off('userStatusChange');
+      socket.off('privateMessage');
     };
   }, [currentUser.id, fetchFeed, fetchFriendData]);
 
@@ -77,8 +88,12 @@ export function useSocial(currentUser) {
     });
   };
 
+  const clearNotification = (senderId) => {
+    setNotifications(prev => prev.filter(id => id !== senderId));
+  };
+
   return {
-    posts, friendRequests, friendsList, onlineUsers, loading, setLoading,
-    fetchFeed, fetchFriendData, handleLike, handleComment, handleDeletePost
+    posts, friendRequests, friendsList, onlineUsers, notifications, loading, setLoading,
+    fetchFeed, fetchFriendData, handleLike, handleComment, handleDeletePost, clearNotification
   };
 }

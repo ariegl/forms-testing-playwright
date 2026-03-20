@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers, onStatusUpdate, onAddFriend }) {
+function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers, onStatusUpdate, onAddFriend, onSelectFriend }) {
   const [friendUsername, setFriendUsername] = useState('');
 
   return (
@@ -33,12 +33,16 @@ function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers
           <div className="space-y-3 mt-2">
             {friendsList.length === 0 && <p className="text-xs opacity-50">Aún no tienes amigos.</p>}
             {friendsList.map(f => (
-              <div key={f.friend_id} className="flex items-center justify-between gap-2">
+              <div 
+                key={f.friend_id} 
+                className="flex items-center justify-between gap-2 p-1 rounded-lg hover:bg-base-200 cursor-pointer transition-colors group"
+                onClick={() => onSelectFriend(f)}
+              >
                 <div className="flex items-center gap-2">
                   <div className={`avatar avatar-xs ${onlineUsers.includes(f.friend_id) ? 'online' : 'offline'}`}>
                     <div className="w-8 rounded-full bg-base-300">{f.profile_image_path && <img src={`http://localhost:3000/${f.profile_image_path}`} />}</div>
                   </div>
-                  <span className="text-xs font-medium">{f.username}</span>
+                  <span className="text-xs font-medium group-hover:text-primary transition-colors">{f.username}</span>
                 </div>
                 <span className={`text-[10px] ${onlineUsers.includes(f.friend_id) ? 'text-success' : 'opacity-40'}`}>
                   {onlineUsers.includes(f.friend_id) ? 'Online' : 'Offline'}
