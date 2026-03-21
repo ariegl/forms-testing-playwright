@@ -1,6 +1,17 @@
 import prisma from '../config/db.js';
 import { v4 as uuidv4 } from 'uuid';
 
+const formatMessage = (msg) => ({
+  id: msg.id,
+  sender_id: msg.senderId,
+  receiver_id: msg.receiverId,
+  message: msg.message,
+  read_at: msg.readAt,
+  deleted_by_sender: msg.deletedBySender,
+  deleted_by_receiver: msg.deletedByReceiver,
+  created_at: msg.createdAt
+});
+
 export const sendMessage = async (req, res) => {
   try {
     const { sender_id, receiver_id, message } = req.body;
@@ -16,10 +27,12 @@ export const sendMessage = async (req, res) => {
       }
     });
     
-    // Notificar al receptor vía Socket
-    req.io.emit('privateMessage', newMessage);
+    const formatted = formatMessage(newMessage);
 
-    res.status(201).json(newMessage);
+    // Notificar al receptor vía Socket
+    req.io.emit('privateMessage', formatted);
+
+    res.status(201).json(formatted);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al enviar mensaje' });
@@ -50,7 +63,7 @@ export const getConversation = async (req, res) => {
       orderBy: { createdAt: 'asc' }
     });
 
-    res.json(messages);
+    res.json(messages.map(formatMessage));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener mensajes' });
