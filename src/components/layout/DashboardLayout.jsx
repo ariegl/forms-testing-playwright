@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../../ThemeToggle';
 import LanguageSelector from '../../LanguageSelector';
+import socket from '../../socket';
 
 function DashboardLayout({ children, currentUser, isAdmin }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    socket.disconnect();
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('user');
     navigate('/login');

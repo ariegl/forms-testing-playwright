@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3000');
+import socket from '../socket';
 
 export function useSocial(currentUser) {
   const [posts, setPosts] = useState([]);
@@ -32,6 +30,7 @@ export function useSocial(currentUser) {
   useEffect(() => {
     fetchFeed();
     fetchFriendData();
+    socket.connect();
     socket.emit('register', currentUser.id);
 
     socket.on('newPost', fetchFeed);

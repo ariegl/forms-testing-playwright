@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3000');
+import socket from '../../socket';
 
 function ChatWindow({ currentUser, friend, onClose, onMinimize }) {
   const [messages, setMessages] = useState([]);
@@ -66,10 +64,19 @@ function ChatWindow({ currentUser, friend, onClose, onMinimize }) {
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-base-200/30">
         {messages.map(m => (
           <div key={m.id} className={`chat ${m.sender_id === currentUser.id ? 'chat-end' : 'chat-start'}`}>
+            <div className="chat-image avatar">
+              <div className="w-8 rounded-full bg-base-300 shadow-sm border border-base-100">
+                {m.sender_id === currentUser.id ? (
+                  currentUser.profile_image_path && <img src={`http://localhost:3000/${currentUser.profile_image_path}`} />
+                ) : (
+                  friend.profile_image_path && <img src={`http://localhost:3000/${friend.profile_image_path}`} />
+                )}
+              </div>
+            </div>
             <div className={`chat-bubble text-xs min-h-0 py-2 px-3 ${m.sender_id === currentUser.id ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
               {m.message}
             </div>
-            <div className="chat-footer opacity-40 text-[9px] mt-1">
+            <div className="chat-footer opacity-40 text-[9px] mt-1 px-1">
               {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
