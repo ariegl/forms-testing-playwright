@@ -48,11 +48,7 @@ function ChatWindow({ currentUser, friend, onClose, onMinimize }) {
     <div className="w-80 h-96 bg-base-100 shadow-2xl rounded-t-xl border border-primary/20 flex flex-col overflow-hidden">
       <div className="bg-primary p-3 text-primary-content flex justify-between items-center shadow-md cursor-pointer" onClick={onMinimize}>
         <div className="flex items-center gap-2">
-          <div className="avatar avatar-xs">
-            <div className="w-6 rounded-full bg-base-300">
-              {friend.profile_image_path && <img src={`http://localhost:3000/${friend.profile_image_path}`} />}
-            </div>
-          </div>
+          <div className={`w-3 h-3 rounded-full ${friend.status === 'online' ? 'bg-success' : 'bg-slate-300'} border border-white/20`}></div>
           <span className="font-bold text-sm">{friend.username}</span>
         </div>
         <div className="flex gap-1">
