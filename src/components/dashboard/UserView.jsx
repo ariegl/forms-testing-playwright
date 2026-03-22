@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSocial } from '../../hooks/useSocial';
 import ProfileCard from './ProfileCard';
@@ -13,6 +13,25 @@ function UserView({ currentUser }) {
   const [postContent, setPostContent] = useState('');
   const [msg, setMsg] = useState(null);
   const [openChats, setOpenChats] = useState([]); // Array of friends
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const pickerRef = useRef(null);
+
+  const emojiGroups = [
+    { label: 'Caras', emojis: ['😀', '😂', '😍', '🥰', '😎', '🤔', '😊', '🥳', '🤩', '🙄', '😏', '😴'] },
+    { label: 'Gestos', emojis: ['👍', '🙌', '👏', '🤝', '👊', '✌️', '🤞', '🙏', '💪', '👋', '🤳', '📍'] },
+    { label: 'Corazones', emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕'] },
+    { label: 'Otros', emojis: ['🔥', '✨', '🎉', '🚀', '💯', '✅', '🌈', '⭐', '🎈', '🎁', '⚡', '💡'] }
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleFriendStatus = async (id, status) => {
     await fetch(`http://localhost:3000/api/friendships/${id}/status`, {
@@ -43,6 +62,7 @@ function UserView({ currentUser }) {
     if (res.ok) {
       setPostContent('');
       setShowEditor(false);
+      setShowEmojiPicker(false);
       social.fetchFeed();
     }
   };
@@ -63,6 +83,10 @@ function UserView({ currentUser }) {
 
   const toggleChatMinimize = (friendId) => {
     setOpenChats(prev => prev.map(c => c.friend_id === friendId ? { ...c, isOpen: !c.isOpen } : c));
+  };
+
+  const addEmoji = (emoji) => {
+    setPostContent(prev => prev + emoji);
   };
 
   // Logic for incoming notifications
@@ -94,12 +118,56 @@ function UserView({ currentUser }) {
 
       <div className="lg:col-span-2 space-y-6">
         {showEditor && (
-          <div className="card bg-base-100 shadow-lg border-2 border-primary/20 animate-in fade-in slide-in-from-top-4 duration-300">
-            <div className="card-body p-4">
-              <textarea className="textarea textarea-bordered w-full text-lg h-32" placeholder="¿Qué quieres compartir?" value={postContent} onChange={(e) => setPostContent(e.target.value)} />
-              <div className="card-actions justify-end mt-2">
-                <button onClick={() => setShowEditor(false)} className="btn btn-ghost btn-sm">Cancelar</button>
-                <button onClick={handleSavePost} className="btn btn-primary btn-sm" disabled={!postContent.trim()}>Publicar</button>
+          <div className="card bg-base-100 shadow-xl border border-primary/10 overflow-visible animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="card-body p-4 relative">
+              <textarea 
+                className="textarea textarea-bordered w-full text-lg h-32 focus:outline-none focus:border-primary transition-colors" 
+                placeholder="¿Qué tienes en mente?" 
+                value={postContent} 
+                onChange={(e) => setPostContent(e.target.value)} 
+                autoFocus
+              />
+              
+              <div className="flex justify-between items-center mt-3 border-t border-base-200 pt-3">
+                <div className="relative" ref={pickerRef}>
+                  <button 
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)} 
+                    className={`btn btn-circle btn-ghost btn-sm text-xl transition-transform hover:scale-110 ${showEmojiPicker ? 'bg-base-200 text-primary' : ''}`}
+                    title="Añadir emoji"
+                  >
+                    😊
+                  </button>
+                  
+                  {showEmojiPicker && (
+                    <div className="absolute left-0 top-full mt-3 bg-base-100 shadow-2xl border border-base-300 rounded-2xl p-4 z-[100] w-64 animate-in zoom-in-95 duration-200 origin-top-left">
+                      <div className="max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                        {emojiGroups.map(group => (
+                          <div key={group.label} className="mb-4 last:mb-0">
+                            <p className="text-[10px] uppercase font-bold text-base-content/50 mb-2 px-1 tracking-wider">{group.label}</p>
+                            <div className="grid grid-cols-6 gap-1">
+                              {group.emojis.map(e => (
+                                <button 
+                                  key={e} 
+                                  onClick={() => addEmoji(e)}
+                                  className="btn btn-ghost btn-square btn-xs text-lg hover:bg-primary/20 hover:scale-110 transition-all p-0 h-8 w-8"
+                                >
+                                  {e}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Arrow indicator */}
+                      <div className="absolute -top-2 left-4 w-4 h-4 bg-base-100 border-l border-t border-base-300 rotate-45"></div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowEditor(false); setShowEmojiPicker(false); }} className="btn btn-ghost btn-sm rounded-lg px-4">Cancelar</button>
+                  <button onClick={handleSavePost} className="btn btn-primary btn-sm rounded-lg px-6 shadow-md shadow-primary/20" disabled={!postContent.trim()}>Publicar</button>
+                </div>
               </div>
             </div>
           </div>
