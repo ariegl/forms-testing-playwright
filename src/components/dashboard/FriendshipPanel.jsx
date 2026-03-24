@@ -62,6 +62,7 @@ function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers
             {friendsList.map(f => (
               <div 
                 key={f.friend_id} 
+                data-testid={`friend-item-${f.username}`}
                 className="flex items-center justify-between gap-2 p-1 rounded-lg hover:bg-base-200 cursor-pointer transition-colors group"
                 onClick={() => onSelectFriend(f)}
               >

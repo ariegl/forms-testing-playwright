@@ -3,7 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:5173',
+    screenshot: 'only-on-failure',
   },
   projects: [
     {
@@ -11,9 +12,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'npx vite --port 3000',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: 'npm run dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: 'node server/index.js',
+      url: 'http://localhost:3000/api/usuarios',
+      reuseExistingServer: !process.env.CI,
+    }
+  ],
 });

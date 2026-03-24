@@ -68,6 +68,10 @@ io.on('connection', (socket) => {
   });
 });
 
-httpServer.listen(port, () => {
-  console.log(`Server and Sockets running at http://localhost:${port}`);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  httpServer.listen(port, () => {
+    console.log(`Server and Sockets running at http://localhost:${port}`);
+  });
+}
+
+export { app, httpServer };

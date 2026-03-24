@@ -45,7 +45,7 @@ function ChatWindow({ currentUser, friend, onClose, onMinimize }) {
   };
 
   return (
-    <div className="w-80 h-96 bg-base-100 shadow-2xl rounded-t-xl border border-primary/20 flex flex-col overflow-hidden">
+    <div data-testid={`chat-window-${friend.username}`} className="w-80 h-96 bg-base-100 shadow-2xl rounded-t-xl border border-primary/20 flex flex-col overflow-hidden">
       <div className="bg-primary p-3 text-primary-content flex justify-between items-center shadow-md cursor-pointer" onClick={onMinimize}>
         <div className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${friend.status === 'online' ? 'bg-success' : 'bg-slate-300'} border border-white/20`}></div>
