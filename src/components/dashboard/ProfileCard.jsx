@@ -1,16 +1,26 @@
 import React, { useState, useRef } from 'react';
+import ImageCropper from '../shared/ImageCropper';
 
 function ProfileCard({ currentUser, onPostCreate }) {
   const [profileImage, setProfileImage] = useState(
     currentUser.profile_image_path ? `http://localhost:3000/${currentUser.profile_image_path}` : null
   );
+  const [tempImage, setTempImage] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleImageUpload = async (e) => {
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setTempImage(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob) => {
+    setTempImage(null);
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', croppedBlob, 'profile.jpg');
     try {
       const res = await fetch(`http://localhost:3000/api/usuarios/${currentUser.id}/profile-image`, {
         method: 'POST',
@@ -32,7 +42,7 @@ function ProfileCard({ currentUser, onPostCreate }) {
             <div className="w-16 h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300 relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
               {profileImage ? <img src={profileImage} alt="Profile" className="object-cover" /> : <div className="flex items-center justify-center h-full text-xl font-bold">{currentUser.username?.[0].toUpperCase()}</div>}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white transition-opacity">Cambiar</div>
-              <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
+              <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*" />
             </div>
           </div>
           <div>
@@ -42,6 +52,14 @@ function ProfileCard({ currentUser, onPostCreate }) {
         </div>
         <button onClick={onPostCreate} className="btn btn-secondary btn-sm w-full mt-4 shadow-lg">+ Nueva Publicación</button>
       </div>
+
+      {tempImage && (
+        <ImageCropper 
+          image={tempImage} 
+          onCropComplete={handleCropComplete} 
+          onCancel={() => setTempImage(null)} 
+        />
+      )}
     </div>
   );
 }
