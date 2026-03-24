@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import ConfirmModal from '../shared/ConfirmModal';
 
 function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers, onStatusUpdate, onAddFriend, onSelectFriend, onDeleteFriends }) {
   const [friendUsername, setFriendUsername] = useState('');
   const [selectedFriends, setSelectedFriends] = useState([]);
+  const [deleteCandidate, setDeleteCandidate] = useState(null); // Array of objects { friend_id, username }
+  const modalRef = useRef(null);
 
   const toggleSelect = (e, friendId) => {
     e.stopPropagation();
@@ -11,18 +14,31 @@ function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers
     );
   };
 
-  const handleDelete = (e, friendId) => {
+  const handleDeleteClick = (e, friend) => {
     e.stopPropagation();
-    if (window.confirm('¿Eliminar amigo?')) {
-      onDeleteFriends([friendId]);
-    }
+    setDeleteCandidate([{ friend_id: friend.friend_id, username: friend.username }]);
+    if (modalRef.current) modalRef.current.showModal();
   };
 
-  const handleBulkDelete = () => {
-    if (window.confirm(`¿Eliminar ${selectedFriends.length} amigos?`)) {
-      onDeleteFriends(selectedFriends);
-      setSelectedFriends([]);
+  const handleBulkDeleteClick = () => {
+    const selectedList = friendsList.filter(f => selectedFriends.includes(f.friend_id))
+      .map(f => ({ friend_id: f.friend_id, username: f.username }));
+    setDeleteCandidate(selectedList);
+    if (modalRef.current) modalRef.current.showModal();
+  };
+
+  const confirmDelete = () => {
+    if (deleteCandidate) {
+      onDeleteFriends(deleteCandidate.map(f => f.friend_id));
+      if (deleteCandidate.length > 1) setSelectedFriends([]);
     }
+    setDeleteCandidate(null);
+    if (modalRef.current) modalRef.current.close();
+  };
+
+  const cancelDelete = () => {
+    setDeleteCandidate(null);
+    if (modalRef.current) modalRef.current.close();
   };
 
   return (
@@ -54,7 +70,7 @@ function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold">Amigos</h3>
             {selectedFriends.length > 0 && (
-              <button onClick={handleBulkDelete} className="btn btn-error btn-xs">Eliminar ({selectedFriends.length})</button>
+              <button onClick={handleBulkDeleteClick} className="btn btn-error btn-xs">Eliminar ({selectedFriends.length})</button>
             )}
           </div>
           <div className="space-y-3 mt-2">
@@ -84,7 +100,7 @@ function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers
                     {onlineUsers.includes(f.friend_id) ? 'Online' : 'Offline'}
                   </span>
                   <button 
-                    onClick={(e) => handleDelete(e, f.friend_id)} 
+                    onClick={(e) => handleDeleteClick(e, f)} 
                     className="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 px-1"
                   >
                     ✖
@@ -101,6 +117,28 @@ function FriendshipPanel({ currentUser, friendRequests, friendsList, onlineUsers
           </div>
         </div>
       </div>
+
+      <ConfirmModal 
+        ref={modalRef} 
+        onConfirm={confirmDelete} 
+        onCancel={cancelDelete}
+        title="¿Eliminar de tu lista de amigos?"
+      >
+        <div className="space-y-3 text-sm">
+          <p>
+            Estás a punto de eliminar a 
+            <span className="font-bold text-primary mx-1">
+              {deleteCandidate?.length === 1 ? deleteCandidate[0].username : `${deleteCandidate?.length} amigos`}
+            </span> 
+            de tu lista de contactos.
+          </p>
+          <div className="bg-base-200/50 p-3 rounded-lg space-y-2 border border-base-200">
+            <p className="flex gap-2"><span>•</span> <span>Se eliminará de tu lista de amigos actual.</span></p>
+            <p className="flex gap-2"><span>•</span> <span>El historial de chat se conservará intacto.</span></p>
+            <p className="flex gap-2 font-medium"><span>•</span> <span>Podrás volver a enviar una solicitud en cualquier momento.</span></p>
+          </div>
+        </div>
+      </ConfirmModal>
     </div>
   );
 }
