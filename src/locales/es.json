@@ -38,7 +38,13 @@
     "friends": "Amigos",
     "requests": "Solicitudes",
     "noFriends": "Aún no tienes amigos.",
-    "addFriendPlaceholder": "Usuario..."
+    "addFriendPlaceholder": "Usuario...",
+    "linkModal": {
+      "title": "Confirmar navegación",
+      "description": "Estás a punto de abandonar la aplicación para visitar el siguiente enlace externo:",
+      "warning": "Asegúrate de que confías en este sitio antes de proceder.",
+      "confirm": "Ir al sitio"
+    }
   },
   "login": {
     "title": "Iniciar Sesión",

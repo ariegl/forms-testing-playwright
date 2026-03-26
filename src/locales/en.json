@@ -38,7 +38,13 @@
     "friends": "Friends",
     "requests": "Requests",
     "noFriends": "You don't have friends yet.",
-    "addFriendPlaceholder": "User..."
+    "addFriendPlaceholder": "User...",
+    "linkModal": {
+      "title": "Confirm Navigation",
+      "description": "You are about to leave the application to visit the following external link:",
+      "warning": "Make sure you trust this site before proceeding.",
+      "confirm": "Go to site"
+    }
   },
   "login": {
     "title": "Login",

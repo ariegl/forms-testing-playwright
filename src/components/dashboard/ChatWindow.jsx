@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import socket from '../../socket';
+import LinkifiedText from '../shared/LinkifiedText';
 
 function ChatWindow({ currentUser, friend, onClose, onMinimize }) {
   const [messages, setMessages] = useState([]);
@@ -70,7 +71,7 @@ function ChatWindow({ currentUser, friend, onClose, onMinimize }) {
               </div>
             </div>
             <div className={`chat-bubble text-xs min-h-0 py-2 px-3 ${m.sender_id === currentUser.id ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
-              {m.message}
+              <LinkifiedText text={m.message} isPrimary={m.sender_id === currentUser.id} />
             </div>
             <div className="chat-footer opacity-40 text-[9px] mt-1 px-1">
               {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

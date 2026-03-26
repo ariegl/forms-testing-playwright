@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import LinkifiedText from '../shared/LinkifiedText';
 
 function PostCard({ post, currentUser, onlineUsers, onLike, onComment, onDelete, language }) {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ function PostCard({ post, currentUser, onlineUsers, onLike, onComment, onDelete,
           </div>
           {post.user_id === currentUser.id && <button onClick={() => onDelete(post.id)} className="btn btn-ghost btn-xs text-error opacity-30 hover:opacity-100">{t('common.actions.delete')}</button>}
         </div>
-        <p className="text-base mb-4 whitespace-pre-wrap">{post.content}</p>
+        <p className="text-base mb-4 whitespace-pre-wrap"><LinkifiedText text={post.content} isPrimary={true} /></p>
         <div className="flex items-center gap-6 border-t border-base-200 pt-3">
           <button onClick={() => onLike(post.id)} className="flex items-center gap-1.5 group hover:text-error transition-colors">
             <span className="text-xl">❤</span> <span className="text-sm font-semibold">{post.likes_count}</span>
@@ -41,7 +42,7 @@ function PostCard({ post, currentUser, onlineUsers, onLike, onComment, onDelete,
         {post.comments.length > 0 && (
           <div className="mt-4 space-y-2 bg-base-200/40 p-3 rounded-lg border border-base-200">
             {post.comments.map(c => (
-              <div key={c.id} className="text-xs leading-relaxed"><span className="font-bold text-primary mr-1.5">{c.commenter_name}:</span><span className="opacity-80">{c.comment}</span></div>
+              <div key={c.id} className="text-xs leading-relaxed"><span className="font-bold text-primary mr-1.5">{c.commenter_name}:</span><span className="opacity-80"><LinkifiedText text={c.comment} /></span></div>
             ))}
           </div>
         )}
