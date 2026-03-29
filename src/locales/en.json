@@ -27,7 +27,9 @@
     "searchPlaceholder": "Search by username...",
     "newUser": "New User",
     "years": "years",
-    "send": "Send"
+    "send": "Send",
+    "page": "Page",
+    "of": "of"
   },
   "social": {
     "commentPlaceholder": "Comment...",

@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 function AdminView({ users, onConfirmDelete }) {
   const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const filteredUsers = users.filter(u => 
     (u.username || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <div className="card bg-base-100 shadow-xl overflow-hidden border border-base-200">
@@ -36,7 +45,7 @@ function AdminView({ users, onConfirmDelete }) {
             </tr>
           </thead>
           <tbody className="text-sm">
-            {filteredUsers.map((u) => (
+            {currentUsers.map((u) => (
               <tr key={u.id} className="hover">
                 <th className="pl-6 font-mono opacity-50">#{u.id}</th>
                 <td className="font-semibold text-base">{u.username}</td>
@@ -58,6 +67,30 @@ function AdminView({ users, onConfirmDelete }) {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="p-4 border-t border-base-200 flex justify-center bg-base-50/30">
+          <div className="join">
+            <button 
+              className="join-item btn btn-sm" 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              «
+            </button>
+            <button className="join-item btn btn-sm pointer-events-none">
+              {t('common.page')} {currentPage} {t('common.of')} {totalPages}
+            </button>
+            <button 
+              className="join-item btn btn-sm" 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              »
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
