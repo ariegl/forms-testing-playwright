@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUsers } from './hooks/useUsers';
+import { useSocial } from './hooks/useSocial';
 import DashboardLayout from './components/layout/DashboardLayout';
 import AdminView from './components/dashboard/AdminView';
 import UserView from './components/dashboard/UserView';
@@ -9,10 +10,11 @@ import ConfirmModal from './components/shared/ConfirmModal';
 function Home() {
   const { t } = useTranslation();
   const { users, loading, deleteUser } = useUsers();
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const { onlineUsers } = useSocial(currentUser);
   const [toast, setToast] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const modalRef = useRef(null);
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   const isAdmin = currentUser.role === 'admin' || currentUser.role === 'super_admin';
 
@@ -42,7 +44,7 @@ function Home() {
   return (
     <DashboardLayout currentUser={currentUser} isAdmin={isAdmin}>
       {isAdmin ? (
-        <AdminView users={users} onConfirmDelete={confirmDelete} />
+        <AdminView users={users} onlineUsers={onlineUsers} onConfirmDelete={confirmDelete} />
       ) : (
         <UserView currentUser={currentUser} />
       )}

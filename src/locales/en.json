@@ -29,7 +29,15 @@
     "years": "years",
     "send": "Send",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "stats": {
+      "todayRegistered": "Registered Today",
+      "totalUsers": "Total Users",
+      "onlineUsers": "Online Now",
+      "offlineUsers": "Offline Now",
+      "admins": "Admins",
+      "standardUsers": "Standard Users"
+    }
   },
   "social": {
     "commentPlaceholder": "Comment...",
